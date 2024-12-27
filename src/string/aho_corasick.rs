@@ -20,29 +20,28 @@ impl AhoCorasick {
     pub fn new(words: &[&str]) -> Self {
         let root: Rc<RefCell<ACNode>> = Rc::new(RefCell::new(ACNode::default()));
 
-        for word in words {
+        for word in words{
             let mut current_node = Rc::clone(&root);
 
             for char in word.chars() {
                 current_node = Rc::clone(Rc::clone(&current_node).borrow_mut().trans.entry(char).or_default());
-                //println!("char: {} trans: {:#?} cur: {:#?} root: {:#?}", char, &current_node.borrow().trans, &current_node, &root);
             }
+
             current_node.borrow_mut().lengths.push(word.len());
         }
 
-        
         Self::build_suffix(Rc::clone(&root));
-        Self { root }
+        Self {root}
     }
 
-    fn build_suffix(root: Rc<RefCell<ACNode>>) {
+    fn build_suffix(root: Rc<RefCell<ACNode>>){
         let mut vec_queue: VecDeque<Rc<RefCell<ACNode>>> = VecDeque::new();
 
         vec_queue.push_back(Rc::clone(&root));
-        
+
         while let Some(parent) = vec_queue.pop_front() {
             let parent_borrow = parent.borrow();
-            
+
             for (c, child) in &parent_borrow.trans {
                 vec_queue.push_back(Rc::clone(child));
                 let mut child = child.borrow_mut();
@@ -58,6 +57,7 @@ impl AhoCorasick {
                         Some(node) => {
                             if node.borrow().trans.contains_key(c) {
                                 let node = &node.borrow().trans[c];
+
                                 child.lengths.extend(node.borrow().lengths.clone());
                                 child.suffix = Rc::downgrade(node);
                                 break;
@@ -67,6 +67,7 @@ impl AhoCorasick {
                         }
                     }
                 }
+
             }
         }
     }
@@ -77,12 +78,12 @@ impl AhoCorasick {
         let mut position: usize = 0;
 
         for char in s.chars() {
-
             loop {
-                if let Some(child) = Rc::clone(&cur).borrow().trans.get(&char) {
+                if let Some(child) = Rc::clone(&cur).borrow().trans.get(&char){
                     cur = Rc::clone(child);
                     break;
                 }
+
                 let suffix = cur.borrow().suffix.clone();
 
                 match suffix.upgrade() {
@@ -92,13 +93,12 @@ impl AhoCorasick {
             }
 
             position += char.len_utf8();
+
             for &length in &cur.borrow().lengths {
-
-                ans.push(&s[position - length..position]);
-
+                ans.push(&s[position-length..position]);
             }
         }
-
+        
         ans
     }
 }

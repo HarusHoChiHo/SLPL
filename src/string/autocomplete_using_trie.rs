@@ -89,7 +89,7 @@ impl Default for Autocomplete {
 #[cfg(test)]
 mod tests {
     use super::Autocomplete;
-    
+
     #[test]
     fn test_autocomplete() {
         let words = vec!["apple", "orange", "oregano"];
