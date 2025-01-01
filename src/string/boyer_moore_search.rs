@@ -36,6 +36,7 @@ fn calc_mismatch_shift(
     let bad_char_shift = bad_char_table.get(&mis_ch).unwrap_or(&-1);
     std::cmp::max(1, mis_idx - bad_char_shift)
 }
+
 pub fn boyer_moore_search(text: &str, pat: &str) -> Vec<usize> {
     let mut positions = Vec::new();
 
